@@ -6,6 +6,8 @@ best done with docker:
 
 ~~~
 mkdir data
+docker run -dt --name db -e POSTGRES_PASSWORD=123456 -v "$PATH/data:/var/lib/postgresql:Z" -p 5432:5432 postgres
+
 docker run -d --name db 
   -e POSTGRES_DB=backend \
   -e POSTGRES_USER=postgres \
