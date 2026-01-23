@@ -39,10 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.admindocs',
     # third-party apps
     'corsheaders',
-    'rest_framework',
+    'rest_framework', 
+    'rest_framework_simplejwt',
     # our apps
     'api',
 ]
+# CORS settings
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
