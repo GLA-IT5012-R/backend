@@ -1,5 +1,5 @@
 
-#外键关系总结（1-N N-1 N-M）
+# 外键关系总结（1-N N-1 N-M）
 | 父表                    | 子表                    | 关系类型 | 说明                         |
 | --------------------- | --------------------- | ---- | -------------------------- |
 | `users`               | `customisations`      | 1–N  | 一个用户可有多条定制配置               |
@@ -87,3 +87,28 @@
 | 椭圆 ○	| 属性（表里的字段）	   |  只标 PK 主键 + 1 个核心业务属性｜
 | 菱形 ◇	| 关系（表之间的业务动作）	|  写动词（如 Creates/Owns/Places）+ 基数｜
 | 连线 →	| 关联方向	从主表指向从表|  （如 users → customisations）｜
+
+
+## 第一页 ER Diagram（用户端核心流程）
+
+| 实体（矩形框）                 | 主键                   | 外键关系 / 备注                                                                           |
+| ----------------------- | -------------------- | ----------------------------------------------------------------------------------- |
+| **users**               | PK: user_id          | 1 → N → customisations（user_id）<br>1 → N → cart（user_id）<br>1 → N → orders（user_id） |
+| **customisations**      | PK: customisation_id | 1 ← N ← users（user_id）<br>1 ← N ← products（product_id）用于记录用户定制选择                    |
+| **cart**                | PK: cart_id          | 1 ← N ← users（user_id）<br>1 ← N ← customisations（design_id）存储用户加入购物车的定制商品           |
+| **orders**              | PK: order_id         | 1 ← N ← users（user_id）<br>1 → N → order_items（order_id）存储订单下的每个商品                   |
+| **order_items**         | PK: order_item_id    | 1 ← N ← orders（order_id）<br>1 ← N ← customisations（design_id）记录每个商品/定制内容及数量         |
+| **products**            | PK: product_id       | 1 → N → customisations（product_id）<br>N–M → product_asset_links（套装关联单品资源）           |
+| **product_asset_links** | PK: link_id          | N–M 连接 products（product_id，套装）和 product_assets（asset_id，单品）                         |
+
+## 第二页 ER Diagram（后台/管理/扩展功能）
+
+| 实体（矩形框）                 | 主键                   | 外键关系 / 备注                                                          |
+| ----------------------- | -------------------- | ------------------------------------------------------------------ |
+| **products**            | PK: product_id       | N–M → product_asset_links（套装↔单品资源）                                 |
+| **product_assets**      | PK: asset_id         | N–M → product_asset_links（单品被套装引用）                                 |
+| **product_asset_links** | PK: link_id          | N–M 连接 products ↔ product_assets                                   |
+| **orders**              | PK: order_id         | 1 → N → order_items（order_id）<br>1 ← N ← users（user_id）用于管理员查看订单状态 |
+| **order_items**         | PK: order_item_id    | 1 ← N ← orders（order_id）<br>1 ← N ← customisations（design_id）      |
+| **customisations**      | PK: customisation_id | 1 ← N ← products（product_id）用于后台统计定制数据                             |
+| **site_content**        | PK: content_id       | 可独立管理网站静态内容，供管理员修改品牌故事、客服信息等                                       |
