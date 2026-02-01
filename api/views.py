@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
+from .models import UserProfile
 
 @api_view(["GET"])
 def hello(request):
@@ -16,3 +16,20 @@ def hello(request):
 @permission_classes([IsAuthenticated])
 def testAuth(request):
     return Response({"message": f"Hello {request.user.username}"})
+
+
+@api_view(["POST"])
+def sync_user(request):
+    data = request.data
+    clerk_id = data.get("id")
+    email = data.get("email")
+    name = data.get("name")
+
+    if not clerk_id or not email:
+        return Response({"error": "Missing required fields"}, status=400)
+
+    user, created = UserProfile.objects.update_or_create(
+        clerk_id=clerk_id, defaults={"email": email, "name": name}
+    )
+
+    return Response({"status": "ok", "user_id": user.id, "created": created})
