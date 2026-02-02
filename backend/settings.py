@@ -22,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-a2(c5uof190^-e6jo1c#_@-3kbh^ieu32)n18+arhj)d32^%b@"
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 # Application definition
 
 INSTALLED_APPS = [
@@ -115,7 +115,11 @@ DATABASES = {
         "PORT": "5432",
     }
 }
-DATABASES['default']=dj_database_url.parse("postgresql://snowcraft_django_render_user:IFISlMQkG2L9VfuJiLBEvOXacVFCozS0@dpg-d609rp94tr6s73ac6ujg-a.oregon-postgres.render.com/snowcraft_django_render")
+
+database_url = os.environ.get("DATABASE_URL")
+DATABASES['default']=dj_database_url.parse(database_url)
+
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
