@@ -92,24 +92,20 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL')  # Railway 会自动提供
+        default=os.environ.get('DATABASE_URL')  # 如果有DATABASE_URL就用它，否则用本地配置
     )
 }
-# DATABASES = {
-#     # 'default': {
-#         # 'ENGINE': 'django.db.backends.sqlite3',
-#         # 'NAME': BASE_DIR / 'db.sqlite3',
-#     # }
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'backend',
-#         'USER': 'postgres',
-#         'PASSWORD': '123456',
-#         'HOST': '127.0.0.1',
-#         'PORT': '5432',
-#     }
-    
-# }
+
+if not os.environ.get('DATABASE_URL'):
+    # 本地开发数据库配置
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'backend',
+        'USER': 'postgres',
+        'PASSWORD': '123456',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
 
 
 # Password validation
