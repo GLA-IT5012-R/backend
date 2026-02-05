@@ -6,6 +6,9 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile
+from .models import Product
+from .serializers import ProductSerializer
+
 
 @api_view(["GET"])
 def hello(request):
@@ -20,6 +23,9 @@ def testAuth(request):
 
 @api_view(["POST"])
 def sync_user(request):
+    """
+    同步@clerk用户信息到数据库
+    """
     data = request.data
     clerk_id = data.get("id")
     email = data.get("email")
@@ -33,3 +39,18 @@ def sync_user(request):
     )
 
     return Response({"status": "ok", "user_id": user.id, "created": created})
+
+
+@api_view(["GET"])
+def product_list(request):
+    """
+    返回所有产品（单品 + 套装）
+    """
+    products = Product.objects.filter(type=1).order_by("id")[:5]
+    
+    serializer = ProductSerializer(products, many=True)
+    return Response({
+        "code": 200,
+        "data": serializer.data,
+        "message": "ok"
+    })
