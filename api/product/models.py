@@ -3,7 +3,7 @@ from django.db import models
 # Pruduct 模型，用于存储商品信息
 class ProductAsset(models.Model):
     """
-    单品资源（雪板 / 眼镜 / 衣服等）
+    单品资源
     """
 
     id = models.BigAutoField(primary_key=True)

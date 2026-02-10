@@ -10,4 +10,5 @@ urlpatterns = [
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("sync-user/", views.sync_user, name="sync-user"),
     path("products/", include("api.product.urls")),
+    path("stats-overview/", views.stats_overview, name="stats-overview"),
 ]
