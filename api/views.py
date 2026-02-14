@@ -52,6 +52,7 @@ def stats_overview(request):
         {
             "user_count": user_count,
             "product_count": product_count,
+            
         }
     )
 

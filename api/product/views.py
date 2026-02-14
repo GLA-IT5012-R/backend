@@ -1,9 +1,15 @@
+import os
+import uuid
+from datetime import datetime
+
+from django.conf import settings
+from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from django.core.paginator import Paginator, EmptyPage
-from django.db.models import Q
-from .models import Product, ProductAsset
+
+from .models import Product, ProductAsset , Customisation
 from .serializers import ProductSerializer, ProductAssetSerializer
 
 
@@ -20,7 +26,6 @@ def product_list(request):
             type: "snowboard",   # 对应 ProductAsset.type
             min_price: 100,
             max_price: 300,
-            p_finish: "matte",   # 可按板面工艺筛选
             p_size: "150",       # 可按尺寸筛选（匹配包含）
         }
     })
@@ -202,3 +207,121 @@ def product_update_status(request):
     )
 
 
+# Allowed image extensions for texture upload
+ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+
+# upload texture and return path/url
+@api_view(["POST"])
+def upload_texture(request):
+    """
+    上传图片纹理，保存到 media/textures/，文件名格式：texture_YYYYMMDD_HHMMSS_<uuid>.ext
+    请求：multipart/form-data，字段名 file 或 image
+    返回：code, data: { path, url, filename }, message
+    """
+    uploaded_file = request.FILES.get("file") or request.FILES.get("image")
+    if not uploaded_file:
+        return Response(
+            {"code": 400, "message": "No file provided. Use 'file' or 'image'."},
+            status=400,
+        )
+
+    ext = os.path.splitext(uploaded_file.name)[1].lower()
+    if ext not in ALLOWED_IMAGE_EXTENSIONS:
+        return Response(
+            {
+                "code": 400,
+                "message": f"Invalid image type. Allowed: {', '.join(ALLOWED_IMAGE_EXTENSIONS)}",
+            },
+            status=400,
+        )
+
+    # 文件名：texture_时间_短uuid.ext
+    time_part = datetime.now().strftime("%Y%m%d_%H%M%S")
+    short_uuid = uuid.uuid4().hex[:8]
+    filename = f"texture_{time_part}_{short_uuid}{ext}"
+
+    # 保存到 media/textures/
+    textures_dir = os.path.join(settings.MEDIA_ROOT, "textures")
+    os.makedirs(textures_dir, exist_ok=True)
+    file_path = os.path.join(textures_dir, filename)
+    with open(file_path, "wb") as f:
+        for chunk in uploaded_file.chunks():
+            f.write(chunk)
+
+    # 相对路径（用于存储或 API 返回）
+    relative_path = f"textures/{filename}"
+    # 访问 URL：项目里用 /api/media/ 提供 media 文件
+    url = f"/api/media/{relative_path}"
+
+    return Response(
+        {
+            "code": 200,
+            "data": {
+                "path": relative_path,
+                "url": url,
+                "filename": filename,
+            },
+            "message": "ok",
+        }
+    )
+
+
+# Customisation 相关接口
+@api_view(["POST"])
+def add_design(request):
+    """
+    新增一条用户定制记录（加入购物车时调用）
+    {
+        "product_id": 1,
+        "user_id": 10001,
+        "p_size": "160",
+        "p_finish": "glossy",
+        "p_flex": "soft",
+        "p_textures": ["tex1.png", "tex2.png"]
+    }
+    """
+    data = request.data
+
+    product_id = data.get("product_id")
+    user_id = data.get("user_id")
+    p_size = data.get("p_size", "")
+    p_finish = data.get("p_finish", "")
+    p_flex = data.get("p_flex", "")
+    p_textures = data.get("p_textures", [])
+
+    # ---------- 基础校验 ----------
+    if not product_id or not user_id:
+        return Response(
+            {"code": 400, "message": "product_id and user_id are required"},
+            status=400,
+        )
+
+    try:
+        product = Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return Response(
+            {"code": 404, "message": "Product not found"},
+            status=404,
+        )
+
+    # ---------- 创建定制记录 ----------
+    customisation = Customisation.objects.create(
+        user_id=user_id,
+        product=product,
+        p_size=p_size,
+        p_finish=p_finish,
+        p_flex=p_flex,
+        p_textures=p_textures,
+    )
+
+    return Response(
+        {
+            "code": 200,
+            "data": {
+                "id": customisation.id,
+                "product_id": product.id,
+                "user_id": user_id,
+            },
+            "message": "Design added successfully",
+        }
+    )

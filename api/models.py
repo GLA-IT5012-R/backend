@@ -1,6 +1,6 @@
 # api/models.py
 from django.db import models
-
+from .product.models import Product, ProductAsset, ProductAssetLink, Customisation
 
 # UserProfile 模型，用于存储从 Clerk 同步过来的用户信息
 class UserProfile(models.Model):
