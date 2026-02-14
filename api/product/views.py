@@ -20,7 +20,7 @@ def product_list(request):
     前端调用示例：
     getProducts({
         page: 1,
-        page_size: 4,
+        page_size: 10,
         params: {
             keyword: "Name",
             type: "snowboard",   # 对应 ProductAsset.type

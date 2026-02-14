@@ -24,7 +24,6 @@ class ProductAsset(models.Model):
     def __str__(self):
         return f"{self.type_name} - {self.name}"
 
-
 class Product(models.Model):
     """
     对外售卖的产品（单品 / 套装）
