@@ -83,7 +83,7 @@ class ProductAssetLink(models.Model):
         Product,
         on_delete=models.CASCADE,
         related_name="asset_links",
-        limit_choices_to={"type": 2},  # 只允许套装
+        # limit_choices_to={"type": 2},  # 只允许套装
     )
 
     asset = models.ForeignKey(

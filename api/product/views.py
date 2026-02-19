@@ -1,15 +1,20 @@
 import os
 import uuid
+import copy
 from datetime import datetime
+from decimal import Decimal
+
 
 from django.conf import settings
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
+from django.db import transaction
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework import status
 
-from .models import Product, ProductAsset , Customisation
+from .models import Product, ProductAsset, ProductAssetLink, Customisation
 from .serializers import ProductSerializer, ProductAssetSerializer
 
 
@@ -47,7 +52,7 @@ def product_list(request):
 
     # ---------- 基础 queryset ----------
     queryset = Product.objects.filter(
-        status=True, type=Product.ProductType.SINGLE
+        type=Product.ProductType.SINGLE
     ).order_by("id")
 
     # ---------- 筛选 ----------
@@ -159,6 +164,170 @@ def product_asset_list(request):
 
 
 @api_view(["POST"])
+def add_product(request):
+
+    data = request.data
+
+    required_fields = ["name", "price", "assets_id"]
+    for field in required_fields:
+        if not data.get(field):
+            return Response(
+                {"error": f"{field} is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+    try:
+        with transaction.atomic():
+
+            # 1️⃣ 查 asset
+            try:
+                asset_id = int(data["assets_id"])
+            except (ValueError, TypeError):
+                return Response(
+                    {"error": "assets_id must be integer"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            asset = ProductAsset.objects.get(pk=asset_id)
+
+            # 2️⃣ 创建 product
+            product = Product.objects.create(
+                name=data["name"],
+                type=1,  # 强制单品
+                price=Decimal(data["price"]),
+                status=data.get("status", True),
+                p_size=data.get("p_size", ""),
+                p_flex=data.get("p_flex", ""),
+                p_finish=data.get("p_finish", ""),
+                p_desc=data.get("p_desc", ""),
+                p_textures=copy.deepcopy(asset.texture_urls or {}),
+            )
+
+            # 3️⃣ 建立绑定关系
+            ProductAssetLink.objects.create(
+                product=product,
+                asset=asset,
+                quantity=1,
+            )
+
+            return Response(
+                {"id": product.id, "message": "Product created successfully"},
+                status=status.HTTP_201_CREATED,
+            )
+
+    except ProductAsset.DoesNotExist:
+        return Response(
+            {"error": "Asset not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+# 新增产品
+
+
+@api_view(["POST"])
+def add_product(request):
+
+    data = request.data
+
+    print("======== ADD PRODUCT DEBUG START ========")
+    print("Incoming data:", data)
+
+    # 🔹 基础校验
+    if not data.get("name"):
+        return Response({"error": "name is required"}, status=400)
+
+    if not data.get("price"):
+        return Response({"error": "price is required"}, status=400)
+
+    if not data.get("assets_id"):
+        return Response({"error": "assets_id is required"}, status=400)
+
+    try:
+        asset_id = int(data["assets_id"])
+    except (ValueError, TypeError):
+        return Response({"error": "assets_id must be integer"}, status=400)
+
+    try:
+        with transaction.atomic():
+
+            # 1️⃣ 查询 asset
+            asset = ProductAsset.objects.get(pk=asset_id)
+
+            print("Found asset:", asset.id)
+            print("Asset texture_urls:", asset.texture_urls)
+
+            # 2️⃣ 深拷贝 texture（防止引用问题）
+            textures_copy = copy.deepcopy(asset.texture_urls or {})
+            print("Textures copy:", textures_copy)
+
+            # 3️⃣ 创建 Product（强制单品 type=1）
+            product = Product.objects.create(
+                name=data["name"],
+                type=1,
+                price=Decimal(data["price"]),
+                status=data.get("status", True),
+                p_size=data.get("p_size", ""),
+                p_flex=data.get("p_flex", ""),
+                p_finish=data.get("p_finish", ""),
+                p_desc=data.get("p_desc", ""),
+                p_textures=textures_copy,
+            )
+
+            print("Product created:", product.id)
+            print("Product textures saved:", product.p_textures)
+
+            # 4️⃣ 创建关联（必须成功）
+            link = ProductAssetLink.objects.create(
+                product=product,
+                asset=asset,
+                quantity=1,
+            )
+
+            print("Link created:", link.id)
+
+            # 5️⃣ 强制验证数据库中是否存在
+            link_count = ProductAssetLink.objects.filter(product=product).count()
+            print("Link count for product:", link_count)
+
+            print("======== ADD PRODUCT DEBUG END ========")
+
+            return Response(
+                {
+                    "code": 0,
+                    "msg": "success",
+                    "data": {
+                        "id": product.id,
+                        "asset_id": asset.id,
+                        "textures": product.p_textures,
+                        "link_count": link_count,
+                    }
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+    except ProductAsset.DoesNotExist:
+        return Response(
+            {"error": "Asset not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    except Exception as e:
+        print("ERROR OCCURRED:", str(e))
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+
+
+
+@api_view(["POST"])
 def product_update_status(request):
     """
     修改单个产品的上架状态
@@ -209,6 +378,7 @@ def product_update_status(request):
 
 # Allowed image extensions for texture upload
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+
 
 # upload texture and return path/url
 @api_view(["POST"])

@@ -1,6 +1,9 @@
 from django.db import models
 from decimal import Decimal
 
+# 引入 Product 模型
+from api.product.models import Product
+
 
 class Order(models.Model):
     """
@@ -13,9 +16,7 @@ class Order(models.Model):
         COMPLETED = 'Completed'
 
     id = models.BigAutoField(primary_key=True)
-    user_id = models.BigIntegerField(
-        help_text="user ID"
-    )
+    user_id = models.BigIntegerField(help_text="user ID")
     order_status = models.CharField(
         max_length=20,
         choices=OrderStatus.choices,
@@ -63,6 +64,16 @@ class OrderItem(models.Model):
         blank=True,
         related_name='order_items',
         help_text="related customisation"
+    )
+
+    # 新增 product 外键
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='order_items',
+        help_text="related product"
     )
     
     quantity = models.PositiveIntegerField(
