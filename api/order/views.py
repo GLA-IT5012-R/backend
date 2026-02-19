@@ -1,8 +1,7 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from django.db import transaction
 import json
+from rest_framework.decorators import api_view
 
 from .models import Order, OrderItem
 from api.product.models import Customisation, Product
@@ -10,8 +9,7 @@ from api.product.models import Customisation, Product
 
 
 
-@csrf_exempt
-@require_http_methods(["POST"])
+@api_view(["POST"])
 def add_order(request):
     """
     新增订单接口
@@ -123,5 +121,73 @@ def add_order(request):
         return JsonResponse({"code": 400, "message": "Invalid JSON format"})
     except ValueError as e:
         return JsonResponse({"code": 400, "message": str(e)})
+    except Exception as e:
+        return JsonResponse({"code": 500, "message": f"Server error: {str(e)}"})
+
+
+@api_view(["GET"])
+def get_user_orders(request, user_id: int):
+    """
+    获取指定用户的所有订单及订单项
+    URL 示例: /api/orders/user/1/
+    返回格式：
+    {
+        "code": 200,
+        "data": [
+            {
+                "order_id": 1,
+                "total_price": "199.99",
+                "order_status": "Pending",
+                "address": "xxx",
+                "email": "xxx",
+                "created_at": "2026-02-19T16:00:00Z",
+                "items": [
+                    {
+                        "order_item_id": 1,
+                        "design": {"id": 1, "name": "Custom A"},
+                        "product": {"id": 10, "name": "Snowboard X"},
+                        "quantity": 2,
+                        "unit_price": "99.99"
+                    },
+                    ...
+                ]
+            },
+            ...
+        ]
+    }
+    """
+    try:
+        orders = Order.objects.filter(user_id=user_id).order_by("-created_at")
+        order_list = []
+
+        for order in orders:
+            items_qs = order.items.select_related("design", "product").all()
+            items_list = []
+            for item in items_qs:
+                items_list.append({
+                    "order_item_id": item.id,
+                    "design": {
+                        "id": item.design.id if item.design else None,
+                        "name": getattr(item.design, "name", None)
+                    } if item.design else None,
+                    "product": {
+                        "id": item.product.id if item.product else None,
+                        "name": getattr(item.product, "name", None)
+                    } if item.product else None,
+                    "quantity": item.quantity,
+                    "unit_price": str(item.unit_price),
+                })
+            
+            order_list.append({
+                "order_id": order.id,
+                "total_price": str(order.total_price),
+                "order_status": order.order_status,
+                "address": order.address,
+                "email": order.email,
+                "created_at": order.created_at.isoformat(),
+                "items": items_list,
+            })
+
+        return JsonResponse({"code": 200, "data": order_list})
     except Exception as e:
         return JsonResponse({"code": 500, "message": f"Server error: {str(e)}"})
