@@ -229,8 +229,6 @@ def add_product(request):
 
 
 # 新增产品
-
-
 @api_view(["POST"])
 def add_product(request):
 
@@ -326,7 +324,7 @@ def add_product(request):
         )
 
 
-
+#
 @api_view(["POST"])
 def product_update_status(request):
     """

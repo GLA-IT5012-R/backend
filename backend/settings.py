@@ -99,27 +99,6 @@ WSGI_APPLICATION = "backend.wsgi.application"
 #         default=os.environ.get('DATABASE_URL')  # 如果有DATABASE_URL就用它，否则用本地配置
 #     )
 # }
-# if not os.environ.get('DATABASE_URL'):
-#     # 本地开发数据库配置
-#     DATABASES['default'] = {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'backend',
-#         'USER': 'postgres',
-#         'PASSWORD': '123456',
-#         'HOST': '127.0.0.1',
-#         'PORT': '5432',
-#     }
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "backend",  # 本地数据库名
-#         "USER": "postgres",
-#         "PASSWORD": "123456",
-#         "HOST": "127.0.0.1",
-#         "PORT": "5432",
-#     }
-# }
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -140,6 +119,15 @@ else:
             "PORT": "5432",
         }
     }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'       # 你的邮件服务商
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'antares.whx@gmail.com'
+EMAIL_HOST_PASSWORD = 'dbjz mmsd rbhy ynmf'
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

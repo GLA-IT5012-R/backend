@@ -5,7 +5,9 @@ from django.db import transaction
 import json
 
 from .models import Order, OrderItem
-from api.product.models import Customisation
+from api.product.models import Customisation, Product
+
+
 
 
 @csrf_exempt
@@ -18,6 +20,7 @@ def add_order(request):
         user_id: 1,
         total_price: 199.99,
         order_status: "Pending",
+        product_id:""
         address:"",
         email:"",
         list: [
@@ -84,11 +87,22 @@ def add_order(request):
                             "message": f"Design with id {item_data['design_id']} does not exist",
                         }
                     )
+                # 验证 product_id 是否存在
+                try:
+                    product = Product.objects.get(id=item_data["product_id"])
+                except Product.DoesNotExist:
+                    return JsonResponse(
+                        {
+                            "code": 400,
+                            "message": f"Product with id {item_data['product_id']} does not exist",
+                        }
+                    )
 
                 # 创建订单项
                 order_item = OrderItem(
                     order=order,
                     design=design,
+                    product=product,
                     quantity=item_data["quantity"],
                     unit_price=item_data["unit_price"],
                 )
