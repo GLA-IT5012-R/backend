@@ -17,6 +17,12 @@ class Order(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     user_id = models.BigIntegerField(help_text="user ID")
+    order_number = models.CharField(
+        max_length=12,
+        unique=True,
+        editable=False,
+        help_text="12-digit unique order number"
+    )
     order_status = models.CharField(
         max_length=20,
         choices=OrderStatus.choices,

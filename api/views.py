@@ -33,34 +33,72 @@ def sync_user(request):
     name = data.get("name")
 
     if not clerk_id or not email:
-        return Response({"error": "Missing required fields"}, status=400)
+        return Response({"code": 400, "message": "Missing required fields"}, status=400)
 
-    # 更新或创建用户
-    user, created = UserProfile.objects.update_or_create(
-        clerk_id=clerk_id, 
-        defaults={
-            "email": email,
-            "name": name,
-            "address": ""  # 默认空
-        }
-    )
+    # 查找是否存在
+    user = UserProfile.objects.filter(clerk_id=clerk_id).first()
 
-    # 返回完整用户信息给前端存储
+    if user:
+        # 只更新 email（避免覆盖用户自己改的昵称）
+        user.email = email
+        user.save()
+        created = False
+    else:
+        user = UserProfile.objects.create(
+            clerk_id=clerk_id,
+            email=email,
+            name=name,
+        )
+        created = True
+
     user_data = {
         "id": user.id,
         "clerk_id": user.clerk_id,
         "email": user.email,
         "username": user.name,
         "address": user.address,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
     }
 
-    return Response({
-        "status": "ok",
-        "message": "User synced successfully",
-        "data": user_data,
-        "created": created
-    })
+    return Response(
+        {
+            "code": 200,
+            "message": "User synced successfully",
+            "data": user_data,
+            "created": created,
+        }
+    )
 
+@api_view(["POST"])
+def update_address(request):
+    clerk_id = request.data.get("clerk_id")
+    address = request.data.get("address")
+
+    if not clerk_id:
+        return Response(
+            {"code": 400, "message": "Missing clerk_id"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    user = UserProfile.objects.filter(clerk_id=clerk_id).first()
+
+    if not user:
+        return Response(
+            {"code": 404, "message": "User not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    user.address = address
+    user.save(update_fields=["address"])  # 🔥 只更新 address 字段
+
+    return Response(
+        {
+            "code": 200,
+            "message": "Address updated successfully",
+            "address": user.address,  # 可选，其实可以不返回
+        }
+    )
 
 @api_view(["GET"])
 def stats_overview(request):
@@ -97,26 +135,26 @@ def verify_verification_code(request):
     if verify_code(email, code):
         # 创建或更新用户，address 默认空
         from .models import UserProfile
+
         user, created = UserProfile.objects.get_or_create(
             email=email,
-            defaults={
-                "name": email,       # 默认用户名为邮箱
-                "address": ""        # 默认空地址
+            defaults={"name": email, "address": ""},  # 默认用户名为邮箱  # 默认空地址
+        )
+
+        # 返回前端需要的用户信息
+        return Response(
+            {
+                "status": "ok",
+                "message": "Verification successful",
+                "data": {
+                    "id": user.id,
+                    "username": user.name,
+                    "email": user.email,
+                    "clerk_id": user.clerk_id,
+                    "address": user.address,
+                },
             }
         )
-        
-        # 返回前端需要的用户信息
-        return Response({
-            "status": "ok",
-            "message": "Verification successful",
-            "data": {
-                "id": user.id,
-                "username": user.name,
-                "email": user.email,
-                "clerk_id": user.clerk_id,
-                "address": user.address
-            }
-        })
     else:
         return Response({"status": "error", "message": "Invalid code"}, status=400)
 
