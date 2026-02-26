@@ -1,14 +1,13 @@
 import random
 from django.core.mail import send_mail
-
-# Create your views here.
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import UserProfile
-# from .product.models import Product
-# from .order.models import Order
+from rest_framework import status
 
+from .models import UserProfile
+from m_products.models import Product
+from m_shops.models import Order
 
 
 
@@ -73,7 +72,7 @@ def sync_user(request):
     )
 
 @api_view(["POST"])
-def update_address(request):
+def save_address(request):
     clerk_id = request.data.get("clerk_id")
     address = request.data.get("address")
 
@@ -171,23 +170,23 @@ def verify_code(email, code):
     return False
 
 
-# @api_view(["GET"])
-# def stats_overview(request):
-#     """
-#     返回基础统计信息：用户数量、产品数量、订单数量
-#     """
-#     user_count = UserProfile.objects.count()
-#     product_count = Product.objects.count()
-#     order_count = Order.objects.count()
+@api_view(["GET"])
+def stats_overview(request):
+    """
+    返回基础统计信息：用户数量、产品数量、订单数量
+    """
+    user_count = UserProfile.objects.count()
+    product_count = Product.objects.count()
+    order_count = Order.objects.count()
 
-#     data = {
-#         "user_count": user_count,
-#         "product_count": product_count,
-#         "order_count": order_count
-#     }
+    data = {
+        "user_count": user_count,
+        "product_count": product_count,
+        "order_count": order_count
+    }
 
-#     return Response({
-#         "code": 200,
-#         "message": "统计信息获取成功",
-#         "data": data
-#     })
+    return Response({
+        "code": 200,
+        "message": "统计信息获取成功",
+        "data": data
+    })

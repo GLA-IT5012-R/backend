@@ -8,7 +8,7 @@ class ProductAsset(models.Model):
 
     id = models.BigAutoField(primary_key=True)
     type = models.CharField(max_length=50)  # snowboard / goggles / clothing
-    type_id = models.CharField(max_length=50, unique=True)  # SB-001, GOG-001
+    asset_code = models.CharField(max_length=50, unique=True)  # SB-001, GOG-001
 
     # ---------- 保留技术相关 ----------
     texture_urls = models.JSONField(
@@ -22,7 +22,7 @@ class ProductAsset(models.Model):
         db_table = "m_product_assets"
 
     def __str__(self):
-        return f"{self.type_name} - {self.name}"
+        return f"{self.type} - {self.asset_code}"
 
 class Product(models.Model):
     """
@@ -45,7 +45,6 @@ class Product(models.Model):
         help_text="product price in pound, e.g. 199.99",
     )
 
-    # ---------- 新增字段 ----------
     p_desc = models.TextField(blank=True, help_text="产品描述")
     p_size = models.CharField(
         max_length=100, default="0", help_text="例如 140,160,180；无尺寸用 0"
@@ -56,7 +55,7 @@ class Product(models.Model):
     p_flex = models.CharField(
         max_length=50, blank=True, help_text="软硬度，例如 soft / regular / stiff"
     )
-    p_textures = models.JSONField(default=dict, blank=True, help_text="产品纹理JSON")
+    p_textures = models.JSONField(default=list, blank=True, help_text="产品纹理JSON")
 
     is_double_sided = models.BooleanField(
         default=False,
@@ -99,7 +98,7 @@ class ProductAssetLink(models.Model):
         unique_together = ("product", "asset")
 
     def __str__(self):
-        return f"{self.product.name} -> {self.asset.name} x {self.quantity}"
+        return f"{self.product.name} -> {self.asset.asset_code} x {self.quantity}"
 
 class Customisation(models.Model):
     """

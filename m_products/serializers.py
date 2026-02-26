@@ -3,10 +3,11 @@ from .models import Product, ProductAsset, ProductAssetLink
 
 class ProductAssetSerializer(serializers.ModelSerializer):
     asset_id = serializers.IntegerField(source="id")
+    
     class Meta:
         model = ProductAsset
         fields = [
-            "asset_id", "type", "type_id", "texture_urls"
+            "asset_id", "type", "asset_code", "texture_urls"
         ]
 
 class ProductSerializer(serializers.ModelSerializer):

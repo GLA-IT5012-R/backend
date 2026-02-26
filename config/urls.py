@@ -18,14 +18,16 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from .settings import API_PREFIX
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('api/', include('api.urls')),
-    path('user/', include('m_users.urls')),
-    path('product/', include('m_products.urls')),
-    path('shops', include('m_shops.urls')),
+    path(f'{API_PREFIX}', include('m_users.urls')),
+    path(f'{API_PREFIX}product/', include('m_products.urls')),
+    path(f'{API_PREFIX}shops/', include('m_shops.urls')),
+    # path(f'{API_PREFIX}/feedback/', include('m_feedback.urls')),
     
 ] 
-urlpatterns += static('/api/media/', document_root=settings.MEDIA_ROOT)
+urlpatterns += static(f'{API_PREFIX}media/', document_root=settings.MEDIA_ROOT)
 

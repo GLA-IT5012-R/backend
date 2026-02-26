@@ -2,7 +2,7 @@
 -- ===============================
 -- 1️⃣ 插入 ProductAsset 数据 (4 条，已存在，可保留)
 -- ===============================
-INSERT INTO public.product_assets (id, type, type_id, texture_urls, created_at, updated_at) VALUES
+INSERT INTO public.m_product_assets (id, type, asset_code, texture_urls, created_at, updated_at) VALUES
 (1, 'flat', 'SB-001', '{"SB-001": ["/api/media/textures/TX001.png"]}', NOW(), NOW()),
 (2, 'camber', 'SB-002', '{"SB-002": ["/api/media/textures/TX002.png"]}', NOW(), NOW()),
 (3, 'rocker', 'SB-003', '{"SB-003": ["/api/media/textures/TX003.png"]}', NOW(), NOW()),
@@ -12,7 +12,7 @@ INSERT INTO public.product_assets (id, type, type_id, texture_urls, created_at, 
 -- 2️⃣ 插入 Product 数据 (8 条)
 -- ===============================
 
-INSERT INTO public.products (id, name, type, status, price, p_desc, p_size, p_finish, p_flex, p_textures, is_double_sided, created_at, updated_at) VALUES
+INSERT INTO public.m_products (id, name, type, status, price, p_desc, p_size, p_finish, p_flex, p_textures, is_double_sided, created_at, updated_at) VALUES
 (1, 'Beginner Snowboard', 1, true, 199.90, '适合初学者的雪板', '150,155,160', 'matte,glossy', 'soft', '{"SB-001":["/api/media/textures/TX001.png"]}', true, NOW(), NOW()),
 (2, 'Pro Snowboard', 1, true, 299.90, '专业级雪板，适合进阶滑手', '155,160,165', 'glossy', 'soft,regular', '{"SB-002":["/api/media/textures/TX002.png"]}', false, NOW(), NOW()),
 (3, 'All-Mountain Snowboard', 1, true, 250.00, '适合多地形滑行的雪板', '148,153,158', 'matte', 'regular', '{"SB-003":["/api/media/textures/TX003.png"]}', false, NOW(), NOW()),
@@ -25,7 +25,7 @@ INSERT INTO public.products (id, name, type, status, price, p_desc, p_size, p_fi
 -- ===============================
 -- 3️⃣ 插入 ProductAssetLink 数据 (8 条，随机绑定资产)
 -- ===============================
-INSERT INTO public.product_asset_links (id, product_id, asset_id, quantity) VALUES
+INSERT INTO public.m_product_asset_links (id, product_id, asset_id, quantity) VALUES
 (1, 1, 1, 1),
 (2, 2, 2, 1),
 (3, 3, 3, 1),

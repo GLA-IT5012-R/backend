@@ -43,7 +43,7 @@ def admin_order_list(request):
                     "items": [
                         {
                             "order_item_id": 1,
-                            "product": {"id": 10, "name": "Snowboard X", "type_id": "SB-001", "is_double_sided": false},
+                            "product": {"id": 10, "name": "Snowboard X", "asset_code": "SB-001", "is_double_sided": false},
                             "quantity": 2,
                             "unit_price": "99.99",
                             "design": {"id": 7, "p_size":"150", "p_finish":"matte","p_flex":"soft"}
@@ -99,8 +99,8 @@ def admin_order_list(request):
                     except Customisation.DoesNotExist:
                         custom_data = None
 
-                # 查询 product 的 type_id
-                type_id = None
+                # 查询 product 的 asset_code
+                asset_code = None
                 if item.product:
                     link = (
                         ProductAssetLink.objects.filter(product=item.product)
@@ -108,7 +108,7 @@ def admin_order_list(request):
                         .first()
                     )
                     if link and link.asset:
-                        type_id = link.asset.type_id
+                        asset_code = link.asset.asset_code
 
                 items_list.append(
                     {
@@ -117,7 +117,7 @@ def admin_order_list(request):
                             {
                                 "id": item.product.id if item.product else None,
                                 "name": getattr(item.product, "name", None),
-                                "type_id": type_id,
+                                "asset_code": asset_code,
                                 "is_double_sided": (
                                     item.product.is_double_sided
                                     if item.product
@@ -314,8 +314,8 @@ def get_user_orders(request, user_id: int):
                     except Customisation.DoesNotExist:
                         custom_data = None
 
-                # 查询 type_id
-                type_id = None
+                # 查询 asset_code
+                asset_code = None
                 if item.product:
                     link = (
                         ProductAssetLink.objects.filter(product=item.product)
@@ -323,7 +323,7 @@ def get_user_orders(request, user_id: int):
                         .first()
                     )
                     if link and link.asset:
-                        type_id = link.asset.type_id
+                        asset_code = link.asset.asset_code
 
                 items_list.append(
                     {
@@ -333,7 +333,7 @@ def get_user_orders(request, user_id: int):
                             {
                                 "id": item.product.id if item.product else None,
                                 "name": getattr(item.product, "name", None),
-                                "type_id": type_id,
+                                "asset_code": asset_code,
                                 "is_double_sided": item.product.is_double_sided,
                             }
                             if item.product
@@ -491,8 +491,8 @@ def get_user_cart(request, user_id: int):
             design = item.design
             product = design.product if hasattr(design, "product") else None
 
-            # 查询 type_id（和 order 接口一致逻辑）
-            type_id = None
+            # 查询 asset_code（和 order 接口一致逻辑）
+            asset_code = None
             if product:
                 link = (
                     ProductAssetLink.objects.filter(product=product)
@@ -500,7 +500,7 @@ def get_user_cart(request, user_id: int):
                     .first()
                 )
                 if link and link.asset:
-                    type_id = link.asset.type_id
+                    asset_code = link.asset.asset_code
 
             cart_list.append(
                 {
@@ -516,7 +516,7 @@ def get_user_cart(request, user_id: int):
                         {
                             "id": product.id,
                             "name": product.name,
-                            "type_id": type_id,
+                            "asset_code": asset_code,
                             "is_double_sided": product.is_double_sided,
                         }
                         if product
