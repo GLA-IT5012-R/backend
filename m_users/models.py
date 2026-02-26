@@ -9,7 +9,9 @@ class UserProfile(models.Model):
     address = models.TextField(blank=True, null=True)  # 可选字段
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
+    class Meta:
+        db_table = "m_user_profiles"
     def __str__(self):
         return self.name or self.email
 

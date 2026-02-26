@@ -48,7 +48,11 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     # our apps
-    "api",
+    # "api",
+    "m_users",
+    "m_products",
+    "m_shops",
+    "m_feedback",
 ]
 # CORS settings
 REST_FRAMEWORK = {
@@ -71,7 +75,7 @@ MIDDLEWARE = [
     #  other middlewares
 ]
 
-ROOT_URLCONF = "backend.urls"
+ROOT_URLCONF = "config.urls"
 
 TEMPLATES = [
     {
@@ -88,7 +92,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "backend.wsgi.application"
+WSGI_APPLICATION = "config.wsgi.application"
 
 
 # Database
@@ -121,12 +125,12 @@ else:
     }
 
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'       # 你的邮件服务商
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'antares.whx@gmail.com'
-EMAIL_HOST_PASSWORD = 'dbjz mmsd rbhy ynmf'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'       # 你的邮件服务商
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'antares.whx@gmail.com'
+# EMAIL_HOST_PASSWORD = 'dbjz mmsd rbhy ynmf'
 
 
 # Password validation

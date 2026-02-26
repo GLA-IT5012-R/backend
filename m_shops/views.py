@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage
 from .models import Order, OrderItem, Cart
-from api.product.models import Customisation, Product, ProductAssetLink
+from m_products.models import Customisation, Product, ProductAssetLink
 
 
 @api_view(["POST"])

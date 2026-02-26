@@ -1,9 +1,6 @@
 from django.db import models
 from decimal import Decimal
-from api.product.models import Customisation
-
-# 引入 Product 模型
-from api.product.models import Product
+from m_products.models import Customisation, Product
 
 
 class Order(models.Model):
@@ -45,7 +42,7 @@ class Order(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "orders"
+        db_table = "m_orders"
 
     def __str__(self):
         return f"Order {self.id} - User {self.user_id}"
@@ -65,7 +62,7 @@ class OrderItem(models.Model):
     )
     
     design = models.ForeignKey(
-        'Customisation',
+        Customisation,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -98,7 +95,7 @@ class OrderItem(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "order_items"
+        db_table = "m_order_items"
 
     def __str__(self):
         return f"OrderItem {self.id} - Order {self.order_id}"
@@ -139,7 +136,7 @@ class Cart(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "cart"
+        db_table = "m_cart"
         ordering = ["-created_at"]
         unique_together = ("user_id", "design")  # 防止同一个用户重复加入同一定制
 

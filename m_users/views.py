@@ -1,5 +1,3 @@
-from django.shortcuts import render
-from django.http import JsonResponse
 import random
 from django.core.mail import send_mail
 
@@ -8,8 +6,8 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import UserProfile
-from .product.models import Product
-from .order.models import Order
+# from .product.models import Product
+# from .order.models import Order
 
 
 
@@ -104,26 +102,6 @@ def update_address(request):
         }
     )
 
-@api_view(["GET"])
-def stats_overview(request):
-    """
-    返回基础统计信息：用户数量、产品数量、订单数量
-    """
-    user_count = UserProfile.objects.count()
-    product_count = Product.objects.count()
-    order_count = Order.objects.count()
-
-    data = {
-        "user_count": user_count,
-        "product_count": product_count,
-        "order_count": order_count
-    }
-
-    return Response({
-        "code": 200,
-        "message": "统计信息获取成功",
-        "data": data
-    })
 
 @api_view(["POST"])
 def request_verification_code(request):
@@ -191,3 +169,25 @@ def verify_code(email, code):
     if cached_code == code:
         return True
     return False
+
+
+# @api_view(["GET"])
+# def stats_overview(request):
+#     """
+#     返回基础统计信息：用户数量、产品数量、订单数量
+#     """
+#     user_count = UserProfile.objects.count()
+#     product_count = Product.objects.count()
+#     order_count = Order.objects.count()
+
+#     data = {
+#         "user_count": user_count,
+#         "product_count": product_count,
+#         "order_count": order_count
+#     }
+
+#     return Response({
+#         "code": 200,
+#         "message": "统计信息获取成功",
+#         "data": data
+#     })

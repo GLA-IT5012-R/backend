@@ -15,11 +15,7 @@ urlpatterns = [
 
     # 同步用户信息的URL user
     path("sync-user/", views.sync_user, name="sync-user"),
-    path("save-address/", views.update_address, name="update-address"),
-    path("stats-overview/", views.stats_overview, name="stats-overview"),
-    # 产品相关的URL product
-    path("products/", include("api.product.urls")),
-    # order/cart的URL
-    path("shops/", include("api.order.urls")),
+    # path("save-address/", views.update_address, name="update-address"),
+    # path("stats-overview/", views.stats_overview, name="stats-overview"),
     
 ]

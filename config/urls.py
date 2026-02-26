@@ -1,5 +1,5 @@
 """
-URL configuration for backend project.
+URL configuration for config project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/5.2/topics/http/urls/
@@ -21,8 +21,11 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('api.urls')),
-
+    # path('api/', include('api.urls')),
+    path('user/', include('m_users.urls')),
+    path('product/', include('m_products.urls')),
+    path('shops', include('m_shops.urls')),
+    
 ] 
 urlpatterns += static('/api/media/', document_root=settings.MEDIA_ROOT)
 

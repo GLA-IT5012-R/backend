@@ -1,4 +1,26 @@
-# backend
+# Django create Models
+
+```sh
+
+# 1. create users model
+# 2. create
+
+
+python manage.py startapp m_users
+python manage.py startapp m_products
+python manage.py startapp m_shops
+python manage.py startapp m_feedback
+```
+
+
+
+
+
+
+
+
+# Docker + postgreSQL
+
 
 ## setup pgsql database
 
