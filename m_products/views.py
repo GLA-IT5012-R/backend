@@ -160,72 +160,6 @@ def product_asset_list(request):
         }
     )
 
-
-@api_view(["POST"])
-def add_product(request):
-
-    data = request.data
-
-    required_fields = ["name", "price", "assets_id"]
-    for field in required_fields:
-        if not data.get(field):
-            return Response(
-                {"error": f"{field} is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-    try:
-        with transaction.atomic():
-
-            # 1️⃣ 查 asset
-            try:
-                asset_id = int(data["assets_id"])
-            except (ValueError, TypeError):
-                return Response(
-                    {"error": "assets_id must be integer"},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-
-            asset = ProductAsset.objects.get(pk=asset_id)
-
-            # 2️⃣ 创建 product
-            product = Product.objects.create(
-                name=data["name"],
-                type=1,  # 强制单品
-                price=Decimal(data["price"]),
-                status=data.get("status", True),
-                p_size=data.get("p_size", ""),
-                p_flex=data.get("p_flex", ""),
-                p_finish=data.get("p_finish", ""),
-                p_desc=data.get("p_desc", ""),
-                p_textures=copy.deepcopy(asset.texture_urls or {}),
-            )
-
-            # 3️⃣ 建立绑定关系
-            ProductAssetLink.objects.create(
-                product=product,
-                asset=asset,
-                quantity=1,
-            )
-
-            return Response(
-                {"id": product.id, "message": "Product created successfully"},
-                status=status.HTTP_201_CREATED,
-            )
-
-    except ProductAsset.DoesNotExist:
-        return Response(
-            {"error": "Asset not found"},
-            status=status.HTTP_404_NOT_FOUND,
-        )
-
-    except Exception as e:
-        return Response(
-            {"error": str(e)},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
-
-
 # 新增产品
 @api_view(["POST"])
 def add_product(request):
@@ -321,8 +255,7 @@ def add_product(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-
-#
+# product 上架状态修改
 @api_view(["POST"])
 def product_update_status(request):
     """
@@ -374,7 +307,6 @@ def product_update_status(request):
 
 # Allowed image extensions for texture upload
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
-
 
 # upload texture and return path/url
 @api_view(["POST"])

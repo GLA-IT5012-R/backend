@@ -10,12 +10,9 @@ from m_products.models import Product
 from m_shops.models import Order
 
 
-
-
 @api_view(["GET"])
 def hello(request):
     return Response({"message": "Hello from Django"})
-
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])

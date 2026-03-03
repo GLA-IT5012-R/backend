@@ -10,8 +10,8 @@ urlpatterns = [
     path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     # user login
-    path("request-code/", views.request_verification_code),
-    path("verify-code/", views.verify_verification_code),
+    path("request-code/", views.request_verification_code , name="request_verification_code"),
+    path("verify-code/", views.verify_verification_code, name="verify_verification_code"),
 
     # 同步用户信息的URL user
     path("sync-user/", views.sync_user, name="sync-user"),
