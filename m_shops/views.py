@@ -8,6 +8,11 @@ from django.utils import timezone
 from django.core.paginator import Paginator, EmptyPage
 from .models import Order, OrderItem, Cart
 from m_products.models import Customisation, Product, ProductAssetLink
+from django.utils.timezone import now
+from django.db.models import Count
+from django.db.models.functions import ExtractMonth
+from rest_framework.response import Response
+from rest_framework import status
 
 
 @api_view(["POST"])
@@ -613,3 +618,36 @@ def batch_delete_cart(request):
 
     except Exception as e:
         return JsonResponse({"code": 500, "message": str(e)})
+
+
+@api_view(["GET"])
+def monthly_order_count(request):
+    """
+    返回当年每个月订单数量统计
+    """
+    try:
+        current_year = now().year
+        # 按月聚合订单数
+        monthly_counts = (
+            Order.objects
+            .filter(created_at__year=current_year)
+            .annotate(month=ExtractMonth('created_at'))
+            .values('month')
+            .annotate(order_count=Count('id'))
+            .order_by('month')
+        )
+
+        # 构造保证12个月都有值的结果
+        result = {month: 0 for month in range(1, 13)}
+        for entry in monthly_counts:
+            result[entry['month']] = entry['order_count']
+
+        return Response(
+            {"code": 200, "msg": "success", "data": result},
+            status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        return Response(
+            {"code": 500, "msg": f"error: {str(e)}", "data": {}},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )

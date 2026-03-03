@@ -26,7 +26,7 @@ urlpatterns = [
     path(f'{API_PREFIX}', include('m_users.urls')),
     path(f'{API_PREFIX}product/', include('m_products.urls')),
     path(f'{API_PREFIX}shops/', include('m_shops.urls')),
-    # path(f'{API_PREFIX}/feedback/', include('m_feedback.urls')),
+    path(f'{API_PREFIX}reviews/', include('m_feedback.urls')),
     
 ] 
 urlpatterns += static(f'{API_PREFIX}media/', document_root=settings.MEDIA_ROOT)
