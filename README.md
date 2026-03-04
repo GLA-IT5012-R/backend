@@ -1,77 +1,57 @@
-# Django create Models
+# 🛠 Backend – Django REST E-commerce System
 
-```sh
+## 1. Project Overview
 
-# 1. create users model
-# 2. create
+This backend is built with **Django** and **Django REST Framework (DRF)**.
+
+It provides RESTful APIs for:
+
+- User authentication and verification
+- Product management
+- Customisation handling
+- Shopping cart logic
+- Order processing
+- Review system
+- Admin analytics
+
+Database: **PostgreSQL**
 
 
-python manage.py startapp m_users
-python manage.py startapp m_products
-python manage.py startapp m_shops
-python manage.py startapp m_feedback
+
+## 2. Tech Stack
+
+- **Framework:** Django
+- **API:** Django REST Framework
+- **Database:** PostgreSQL
+- **Authentication:** JWT + Email verification
+- **Media Storage:** Local media directory
+- **Data Serialization:** DRF Serializers
+
+---
+
+## 3. Application Modules
+
+```bash
+
+backend/
+├── config/                # Project configuration｜settings
+├── m_users/               # User module: profile & authentication
+│   └── tests.py           # Unit tests for core module
+├── m_products/            # Products, assets, and customization
+├── m_shops/               # Orders & cart management
+├── m_feedback/            # Reviews & ratings
+├── media/                 # Uploaded textures / media files
+├── manage.py              # Django management script
+└── requirements.txt       # Project dependencies
+
 ```
 
+## 4. Running the Backend
 
+```bash 
+pip install -r requirements.txt 
+python manage.py migrate 
+python manage.py runserver
+```
 
-
-
-
-
-
-# Docker + postgreSQL
-
-
-## setup pgsql database
-
-best done with docker:
-
-~~~
-mkdir data
-docker run -d --name db 
-  -e POSTGRES_DB=backend \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=123456 \
-  -v "$PWD/data:/var/lib/postgresql/data" \
-  -p 5432:5432 \
-  postgres:16
-~~~
-
-enter the psql shell:
-~~~
-docker exec -it db psql -U postgres
-~~~
-
-then execute:
-~~~
-create database backend;
-~~~
-
-to actually create the database
-
-## install the project
-
-best done with uv:
-
-~~~
-uv sync
-~~~
-
-this automatically creates a venv just for this project, so no manual fuss required
-
-## run migrations
-
-~~~
-uv run manage.py migrate
-~~~
-
-this creates necessary database structures
-
-## run server
-
-~~~
-uv run manage.py runserver 127.0.0.1:8787
-~~~
-
-open http://127.0.0.1:8787/ in your browser to view the site
 
