@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     # our apps
-    # "api",
     "m_users",
     "m_products",
     "m_shops",

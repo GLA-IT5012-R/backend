@@ -23,10 +23,10 @@ INSERT INTO public.m_products (id, name, type, status, price, p_desc, p_size, p_
 (2, 'Pro Snowboard', 1, true, 299.90, '专业级雪板，适合进阶滑手', '155,160,165', 'glossy', 'soft,regular', '{"SB-002":["/api/media/textures/TX002.png"]}', false, NOW(), NOW()),
 (3, 'All-Mountain Snowboard', 1, true, 250.00, '适合多地形滑行的雪板', '148,153,158', 'matte', 'regular', '{"SB-003":["/api/media/textures/TX003.png"]}', false, NOW(), NOW()),
 (4, 'Freestyle Snowboard', 1, true, 220.00, '适合自由式和公园滑行', '140,145,150', 'glossy', 'soft', '{"SB-004":["/api/media/textures/TX004.png"]}', false, NOW(), NOW()),
-(5, 'Powder Snowboard', 1, true, 270.00, '专为深雪设计，浮力强', '155,160,165', 'matte,glossy', 'regular', '{"SB-001":["/api/media/textures/TX001.png"]}', false, NOW(), NOW()),
-(6, 'Splitboard', 1, true, 320.00, '可拆分雪板，适合登山和下坡', '150,155,160', 'glossy', 'soft,regular', '{"SB-002":["/api/media/textures/TX002.png"]}', false, NOW(), NOW()),
-(7, 'Carving Snowboard', 1, true, 280.00, '专为精准转弯设计，抓地力强', '148,153,158', 'matte', 'stiff', '{"SB-003":["/api/media/textures/TX003.png"]}', false, NOW(), NOW()),
-(8, 'All-Rounder Snowboard', 1, true, 260.00, '适合全能滑手，多用途雪板', '150,155,160', 'glossy', 'soft,regular', '{"SB-004":["/api/media/textures/TX004.png"]}', false, NOW(), NOW());
+(5, 'Powder Snowboard', 1, true, 270.00, '专为深雪设计，浮力强', '155,160,165', 'matte,glossy', 'regular', '{"SB-001":["/api/media/textures/TX005.png"]}', false, NOW(), NOW()),
+(6, 'Splitboard', 1, true, 320.00, '可拆分雪板，适合登山和下坡', '150,155,160', 'glossy', 'soft,regular', '{"SB-002":["/api/media/textures/TX006.png"]}', false, NOW(), NOW()),
+(7, 'Carving Snowboard', 1, true, 280.00, '专为精准转弯设计，抓地力强', '148,153,158', 'matte', 'stiff', '{"SB-003":["/api/media/textures/TX007.png"]}', false, NOW(), NOW()),
+(8, 'All-Rounder Snowboard', 1, true, 260.00, '适合全能滑手，多用途雪板', '150,155,160', 'glossy', 'soft,regular', '{"SB-004":["/api/media/textures/TX008.png"]}', false, NOW(), NOW());
 
 -- ===============================
 -- 3️⃣ 插入 ProductAssetLink 数据 (8 条，随机绑定资产)
