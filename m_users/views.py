@@ -8,7 +8,7 @@ from rest_framework import status
 from .models import UserProfile
 from m_products.models import Product
 from m_shops.models import Order
-
+from django.utils import timezone
 
 @api_view(["GET"])
 def keepalive(request):
