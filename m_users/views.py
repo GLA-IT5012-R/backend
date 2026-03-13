@@ -11,8 +11,11 @@ from m_shops.models import Order
 
 
 @api_view(["GET"])
-def hello(request):
-    return Response({"message": "Hello from Django"})
+def keepalive(request):
+    return Response({
+        "status": "ok",
+        "time": timezone.now()  # 可选，显示当前服务器时间
+    })
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
