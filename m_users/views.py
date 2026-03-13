@@ -11,7 +11,7 @@ from m_shops.models import Order
 from django.utils import timezone
 
 @api_view(["GET"])
-def keepalive(request):
+def hello(request):
     return Response({
         "status": "ok",
         "time": timezone.now()  # 可选，显示当前服务器时间
