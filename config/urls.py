@@ -19,8 +19,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from .settings import API_PREFIX
+from .views import home
 
 urlpatterns = [
+    path('', home), 
     path('admin/', admin.site.urls),
     # path('api/', include('api.urls')),
     path(f'{API_PREFIX}', include('m_users.urls')),
