@@ -1,4 +1,6 @@
 from django.db import models
+from m_users.models import UserProfile
+
 
 # Pruduct 模型，用于存储商品信息
 class ProductAsset(models.Model):
@@ -23,6 +25,7 @@ class ProductAsset(models.Model):
 
     def __str__(self):
         return f"{self.type} - {self.asset_code}"
+
 
 class Product(models.Model):
     """
@@ -59,9 +62,9 @@ class Product(models.Model):
 
     is_double_sided = models.BooleanField(
         default=False,
-        help_text="是否双面纹理：False 表示单面，True 表示正反使用同一张图"
+        help_text="是否双面纹理：False 表示单面，True 表示正反使用同一张图",
     )
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -70,6 +73,7 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class ProductAssetLink(models.Model):
     """
@@ -100,14 +104,18 @@ class ProductAssetLink(models.Model):
     def __str__(self):
         return f"{self.product.name} -> {self.asset.asset_code} x {self.quantity}"
 
+
 class Customisation(models.Model):
     """
     用户定制记录表
     """
+
     id = models.BigAutoField(primary_key=True)
 
     # ---------- 关联用户和产品 ----------
-    user_id = models.BigIntegerField(help_text="用户ID")  # 可用 FK -> User，如果有用户模型的话
+   
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="customisations", null=True, blank=True)
+
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
@@ -138,4 +146,3 @@ class Customisation(models.Model):
 
     def __str__(self):
         return f"Customisation {self.id} - User {self.user_id} - Product {self.product.name}"
-
