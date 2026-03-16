@@ -24,7 +24,6 @@ from .views import home
 urlpatterns = [
     path('', home), 
     path('admin/', admin.site.urls),
-    # path('api/', include('api.urls')),
     path(f'{API_PREFIX}', include('m_users.urls')),
     path(f'{API_PREFIX}product/', include('m_products.urls')),
     path(f'{API_PREFIX}shops/', include('m_shops.urls')),

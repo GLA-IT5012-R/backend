@@ -20,7 +20,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def get_user(self, obj):
         return {
-            "username": obj.user.name  # 你没有 username 字段，用 name 替代
+            "username": obj.user.name  
         }
 
     def get_product(self, obj):

@@ -2,7 +2,7 @@ from django.db import models
 from m_users.models import UserProfile
 
 
-# Pruduct 模型，用于存储商品信息
+# Product model, used to store product info
 class ProductAsset(models.Model):
     """
     单品资源
@@ -12,7 +12,7 @@ class ProductAsset(models.Model):
     type = models.CharField(max_length=50)  # snowboard / goggles / clothing
     asset_code = models.CharField(max_length=50, unique=True)  # SB-001, GOG-001
 
-    # ---------- 保留技术相关 ----------
+    # ---------- texture urls ----------
     texture_urls = models.JSONField(
         default=dict, help_text='例如 {"SB-001": ["front.png", "back.png"]}'
     )
@@ -29,18 +29,18 @@ class ProductAsset(models.Model):
 
 class Product(models.Model):
     """
-    对外售卖的产品（单品 / 套装）
+    type: 1 single, 2 bundle
     """
 
     class ProductType(models.IntegerChoices):
-        SINGLE = 1, "单品"
-        BUNDLE = 2, "套装"
+        SINGLE = 1, "single"
+        BUNDLE = 2, "bundle"
 
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=255)
 
     type = models.IntegerField(choices=ProductType.choices, default=ProductType.SINGLE)
-    status = models.BooleanField(default=True, help_text="是否上架")
+    status = models.BooleanField(default=True, help_text="is product active?")
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -48,21 +48,21 @@ class Product(models.Model):
         help_text="product price in pound, e.g. 199.99",
     )
 
-    p_desc = models.TextField(blank=True, help_text="产品描述")
+    p_desc = models.TextField(blank=True, help_text="product description")
     p_size = models.CharField(
-        max_length=100, default="0", help_text="例如 140,160,180；无尺寸用 0"
+        max_length=100, default="0", help_text="e.g. 140,160,180; no size use 0"
     )
     p_finish = models.CharField(
-        max_length=50, blank=True, help_text="板面工艺，例如 matte / glossy"
+        max_length=50, blank=True, help_text="board finish, e.g. matte / glossy"
     )
     p_flex = models.CharField(
-        max_length=50, blank=True, help_text="软硬度，例如 soft / regular / stiff"
+        max_length=50, blank=True, help_text="flexibility, e.g. soft / regular / stiff"
     )
-    p_textures = models.JSONField(default=list, blank=True, help_text="产品纹理JSON")
+    p_textures = models.JSONField(default=list, blank=True, help_text="product textures JSON")
 
     is_double_sided = models.BooleanField(
         default=False,
-        help_text="是否双面纹理：False 表示单面，True 表示正反使用同一张图",
+        help_text="is double sided texture: False means single sided, True means both sides use the same image",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -77,7 +77,7 @@ class Product(models.Model):
 
 class ProductAssetLink(models.Model):
     """
-    套装与单品资源的关联表
+    product and asset link table, used to link products and assets, especially for bundles
     """
 
     id = models.BigAutoField(primary_key=True)
@@ -86,7 +86,7 @@ class ProductAssetLink(models.Model):
         Product,
         on_delete=models.CASCADE,
         related_name="asset_links",
-        # limit_choices_to={"type": 2},  # 只允许套装
+        # limit_choices_to={"type": 2},  # only allow bundles
     )
 
     asset = models.ForeignKey(
@@ -107,12 +107,12 @@ class ProductAssetLink(models.Model):
 
 class Customisation(models.Model):
     """
-    用户定制记录表
+    user customisation record, used to store user customisation choices for a product
     """
 
     id = models.BigAutoField(primary_key=True)
 
-    # ---------- 关联用户和产品 ----------
+    # ---------- user and product ----------
    
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name="customisations", null=True, blank=True)
 
@@ -120,22 +120,22 @@ class Customisation(models.Model):
         Product,
         on_delete=models.CASCADE,
         related_name="customisations",
-        help_text="用户定制的产品",
+        help_text="user customised product",
     )
 
     # ---------- 核心定制字段（拆开存，方便查询/修改/统计） ----------
     p_size = models.CharField(
-        max_length=50, blank=True, help_text="用户选择尺寸，例如 160"
+        max_length=50, blank=True, help_text="user selected size, e.g. 160"
     )
     p_finish = models.CharField(
-        max_length=50, blank=True, help_text="用户选择板面工艺，例如 glossy"
+        max_length=50, blank=True, help_text="user selected board finish, e.g. glossy"
     )
     p_flex = models.CharField(
-        max_length=50, blank=True, help_text="用户选择软硬度，例如 soft"
+        max_length=50, blank=True, help_text="user selected flexibility, e.g. soft"
     )
-    # 如果纹理多选或者组合复杂，使用 JSON 存储
+    # if multiple or complex texture choices, use JSON to store
     p_textures = models.JSONField(
-        default=list, blank=True, help_text="用户选择纹理，可能多个，存 JSON"
+        default=list, blank=True, help_text="user selected textures, possibly multiple, stored as JSON"
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

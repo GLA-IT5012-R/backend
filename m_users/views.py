@@ -16,7 +16,7 @@ from django.utils import timezone
 def hello(request):
     return Response({
         "status": "ok",
-        "time": timezone.now()  # 可选，显示当前服务器时间
+        "time": timezone.now()  
     })
 
 @api_view(["GET"])
@@ -28,7 +28,7 @@ def testAuth(request):
 @api_view(["POST"])
 def sync_user(request):
     """
-    同步 @clerk 用户信息到数据库，并返回用户信息给前端
+    sync Clerk user info to our database, and return user info to frontend
     """
     data = request.data
     clerk_id = data.get("id")
@@ -38,11 +38,11 @@ def sync_user(request):
     if not clerk_id or not email:
         return Response({"code": 400, "message": "Missing required fields"}, status=400)
 
-    # 查找是否存在
+    # search user by clerk_id, if exists update email and name, else create new user
     user = UserProfile.objects.filter(clerk_id=clerk_id).first()
 
     if user:
-        # 只更新 email（避免覆盖用户自己改的昵称）
+        # only update email (avoid overwriting user-changed name)
         user.email = email
         user.save()
         created = False
@@ -93,13 +93,13 @@ def save_address(request):
         )
 
     user.address = address
-    user.save(update_fields=["address"])  # 🔥 只更新 address 字段
+    user.save(update_fields=["address"])  # 🔥 just update address field
 
     return Response(
         {
             "code": 200,
             "message": "Address updated successfully",
-            "address": user.address,  # 可选，其实可以不返回
+            "address": user.address,  
         }
     )
 
@@ -121,7 +121,7 @@ def verify_verification_code(request):
         return Response({"error": "Email and code required"}, status=400)
 
     if verify_code(email, code):
-        # 创建或更新用户，address 默认空
+        # create/update user with empty address
         from .models import UserProfile
 
         user, created = UserProfile.objects.get_or_create(
@@ -129,7 +129,7 @@ def verify_verification_code(request):
             defaults={"name": email, "address": ""},  # 默认用户名为邮箱  # 默认空地址
         )
 
-        # 返回前端需要的用户信息
+        # return user info needed by frontend
         return Response(
             {
                 "status": "ok",
@@ -148,12 +148,12 @@ def verify_verification_code(request):
 
 
 def send_verification_code(email):
-    code = str(random.randint(100000, 999999))  # 6位数字验证码
-    # 保存到数据库或缓存
+    code = str(random.randint(100000, 999999))  # 6 number code
+    # save code to cache with 5 minutes expiration
     from django.core.cache import cache
 
-    cache.set(f"verify_{email}", code, timeout=300)  # 5分钟有效
-    # 发送邮件
+    cache.set(f"verify_{email}", code, timeout=300)  # 5minutes avilable
+    # send email with the code (for testing, we can just print it to console instead of actually sending email)
     send_mail(
         subject="Your Verification Code",
         message=f"Your verification code is {code}",
@@ -175,7 +175,7 @@ def verify_code(email, code):
 @api_view(["GET"])
 def stats_overview(request):
     """
-    返回基础统计信息：用户数量、产品数量、订单数量
+    return basic stats: user count, product count, order count
     """
     user_count = UserProfile.objects.count()
     product_count = Product.objects.count()
@@ -189,6 +189,6 @@ def stats_overview(request):
 
     return Response({
         "code": 200,
-        "message": "统计信息获取成功",
+        "message": "statistics overview", 
         "data": data
     })

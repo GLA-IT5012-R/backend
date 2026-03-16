@@ -19,41 +19,39 @@ from .serializers import ProductSerializer, ProductAssetSerializer
 @api_view(["POST"])
 def product_list(request):
     """
-    返回产品列表（支持分页和多条件筛选）
-    前端调用示例：
+    Return list of products with pagination and multi-condition filtering
+    Frontend call example:
     getProducts({
         page: 1,
         page_size: 10,
         params: {
             keyword: "Name",
-            type: "snowboard",   # 对应 ProductAsset.type
+            type: "snowboard",   # corresponds to ProductAsset.type
             min_price: 100,
             max_price: 300,
-            p_size: "150",       # 可按尺寸筛选（匹配包含）
+            p_size: "150",       # can filter by size (substring match)
         }
     })
     """
     data = request.data
     params = data.get("params") or {}
 
-    # ---------- 分页 ----------
+    # ---------- pagination ----------
     page = data.get("page", 1)
     page_size = data.get("page_size", 10)
 
-    # ---------- 筛选条件 ----------
+    # ---------- filtering conditions ----------
     keyword = params.get("keyword")
-    asset_type = params.get("type")  # 前端传的 asset type
+    asset_type = params.get("type")  # frontend passed asset type
     min_price = params.get("min_price")
     max_price = params.get("max_price")
     p_finish = params.get("p_finish")
     p_size = params.get("p_size")
 
-    # ---------- 基础 queryset ----------
-    queryset = Product.objects.filter(
-        type=Product.ProductType.SINGLE
-    ).order_by("id")
+    # ----------  Basic queryset ----------
+    queryset = Product.objects.filter(type=Product.ProductType.SINGLE).order_by("id")
 
-    # ---------- 筛选 ----------
+    # ---------- filtering ----------
     if keyword:
         queryset = queryset.filter(
             Q(name__icontains=keyword) | Q(p_desc__icontains=keyword)
@@ -84,10 +82,10 @@ def product_list(request):
     if p_size:
         queryset = queryset.filter(p_size__icontains=p_size)
 
-    # 去重，避免重复
+    # remove duplicates caused by joins
     queryset = queryset.distinct()
 
-    # ---------- 分页处理 ----------
+    # ---------- pagination ----------
     try:
         page = int(page)
         page_size = int(page_size)
@@ -103,7 +101,7 @@ def product_list(request):
     except EmptyPage:
         items = []
 
-    # ---------- 序列化返回 ----------
+    # ---------- serialization ----------
     serializer = ProductSerializer(items, many=True)
     return Response(
         {
@@ -122,7 +120,7 @@ def product_list(request):
 @api_view(["POST"])
 def product_asset_list(request):
     """
-    返回 product_assets 列表（支持分页）
+    Return list of product assets with pagination
     """
     data = request.data or {}
     page = data.get("page", 1)
@@ -160,7 +158,8 @@ def product_asset_list(request):
         }
     )
 
-# 新增产品
+
+# create product with linked asset, for single products only, bundles are created separately
 @api_view(["POST"])
 def add_product(request):
 
@@ -169,7 +168,7 @@ def add_product(request):
     print("======== ADD PRODUCT DEBUG START ========")
     print("Incoming data:", data)
 
-    # 🔹 基础校验
+    # basic validation
     if not data.get("name"):
         return Response({"error": "name is required"}, status=400)
 
@@ -187,17 +186,17 @@ def add_product(request):
     try:
         with transaction.atomic():
 
-            # 1️⃣ 查询 asset
+            # 1️⃣ search asset
             asset = ProductAsset.objects.get(pk=asset_id)
 
             print("Found asset:", asset.id)
             print("Asset texture_urls:", asset.texture_urls)
 
-            # 2️⃣ 深拷贝 texture（防止引用问题）
+            # 2️⃣ deep copy texture（
             textures_copy = copy.deepcopy(asset.texture_urls or {})
             print("Textures copy:", textures_copy)
 
-            # 3️⃣ 创建 Product（强制单品 type=1）
+            # 3️⃣ create Product (type=1）
             product = Product.objects.create(
                 name=data["name"],
                 type=1,
@@ -213,7 +212,7 @@ def add_product(request):
             print("Product created:", product.id)
             print("Product textures saved:", product.p_textures)
 
-            # 4️⃣ 创建关联（必须成功）
+            # 4️⃣ build link (must succeed)
             link = ProductAssetLink.objects.create(
                 product=product,
                 asset=asset,
@@ -222,7 +221,7 @@ def add_product(request):
 
             print("Link created:", link.id)
 
-            # 5️⃣ 强制验证数据库中是否存在
+            # 5️⃣ strong link to ensure data integrity, this is a sanity check and should never fail
             link_count = ProductAssetLink.objects.filter(product=product).count()
             print("Link count for product:", link_count)
 
@@ -237,7 +236,7 @@ def add_product(request):
                         "asset_id": asset.id,
                         "textures": product.p_textures,
                         "link_count": link_count,
-                    }
+                    },
                 },
                 status=status.HTTP_201_CREATED,
             )
@@ -255,15 +254,16 @@ def add_product(request):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
 
-# product 上架状态修改
+
+# product status update (for single product, bundles are updated separately)
 @api_view(["POST"])
 def product_update_status(request):
     """
-    修改单个产品的上架状态
-    请求示例:
+    update product status (for single products only, bundles are updated separately)
+    Request example:
     {
         "id": 1,
-        "status": true   # 或 false
+        "status": true   # or false
     }
     """
     data = request.data or {}
@@ -275,7 +275,7 @@ def product_update_status(request):
             {"code": 400, "message": "id and status are required"}, status=400
         )
 
-    # status 只能是布尔或 0/1
+    # status just only boolean 0/1
     if isinstance(status, bool):
         new_status = status
     elif status in [0, 1, "0", "1", "true", "false", "True", "False"]:
@@ -308,13 +308,17 @@ def product_update_status(request):
 # Allowed image extensions for texture upload
 ALLOWED_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
 
+
 # upload texture and return path/url
 @api_view(["POST"])
 def upload_texture(request):
     """
-    上传图片纹理，保存到 media/textures/，文件名格式：texture_YYYYMMDD_HHMMSS_<uuid>.ext
-    请求：multipart/form-data，字段名 file 或 image
-    返回：code, data: { path, url, filename }, message
+    uploaded with multipart/form-data, field name file or image
+    Response: code, data: { path, url, filename }, message
+    Upload texture image, save to media/textures/, filename format: texture_YYYYMMDD_HHMMSS_<uuid>.ext
+    Request: multipart/form-data, field name file or image
+    Response: code, data: { path, url, filename }, message
+   
     """
     uploaded_file = request.FILES.get("file") or request.FILES.get("image")
     if not uploaded_file:
@@ -333,12 +337,12 @@ def upload_texture(request):
             status=400,
         )
 
-    # 文件名：texture_时间_短uuid.ext
+    # filename format: texture_YYYYMMDD_HHMMSS_<uuid>.ext
     time_part = datetime.now().strftime("%Y%m%d_%H%M%S")
     short_uuid = uuid.uuid4().hex[:8]
     filename = f"texture_{time_part}_{short_uuid}{ext}"
 
-    # 保存到 media/textures/
+    # save to media/textures/ 
     textures_dir = os.path.join(settings.MEDIA_ROOT, "textures")
     os.makedirs(textures_dir, exist_ok=True)
     file_path = os.path.join(textures_dir, filename)
@@ -346,9 +350,9 @@ def upload_texture(request):
         for chunk in uploaded_file.chunks():
             f.write(chunk)
 
-    # 相对路径（用于存储或 API 返回）
+    # elative path (for storage or API response)
     relative_path = f"textures/{filename}"
-    # 访问 URL：项目里用 /api/media/ 提供 media 文件
+    # link url to frontend, use /api/media/
     url = f"/api/media/{relative_path}"
 
     return Response(
@@ -364,11 +368,12 @@ def upload_texture(request):
     )
 
 
-# Customisation 相关接口
+# Customisation interface
 @api_view(["POST"])
 def add_design(request):
     """
-    新增一条用户定制记录（加入购物车时调用）
+    create a user customisation record (called when adding to cart)
+    Request example:
     {
         "product_id": 1,
         "user_id": 10001,
@@ -387,7 +392,7 @@ def add_design(request):
     p_flex = data.get("p_flex", "")
     p_textures = data.get("p_textures", [])
 
-    # ---------- 基础校验 ----------
+    # ---------- basic validation ----------
     if not product_id or not user_id:
         return Response(
             {"code": 400, "message": "product_id and user_id are required"},
@@ -402,7 +407,7 @@ def add_design(request):
             status=404,
         )
 
-    # ---------- 创建定制记录 ----------
+    # ---------- create customisation record ----------
     customisation = Customisation.objects.create(
         user_id=user_id,
         product=product,

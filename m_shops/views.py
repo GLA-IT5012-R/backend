@@ -18,17 +18,17 @@ from rest_framework import status
 @api_view(["POST"])
 def admin_order_list(request):
     """
-    管理员查询订单接口
-    前端传入 JSON：
+     admin order list API
+    Request body example:
     {
         "page": 1,
         "page_size": 10,
         "params": {
-            "user_id": 1,          # 可选
-            "status": "Pending"    # 可选
+            "user_id": 1,          # optional filter by user ID
+            "status": "Pending"    # optional filter by order status (Pending, Confirmed, Shipped, Completed, Cancelled)
         }
     }
-    返回格式：
+    response example:
     {
         "code": 200,
         "data": {
@@ -69,12 +69,12 @@ def admin_order_list(request):
 
         queryset = Order.objects.all().order_by("-created_at")
 
-        # 支持按用户ID筛选
+        # support filter by user ID
         user_id = params.get("user_id")
         if user_id:
             queryset = queryset.filter(user_id=user_id)
 
-        # 支持按订单状态筛选
+        # support filter by order status
         status = params.get("status")
         if status:
             queryset = queryset.filter(order_status=status)
@@ -89,7 +89,7 @@ def admin_order_list(request):
         for order in page_obj:
             items_list = []
             for item in order.items.select_related("design", "product").all():
-                # 查询定制信息
+                #  search for customisation details
                 custom_data = None
                 if item.design_id:
                     try:
@@ -104,7 +104,7 @@ def admin_order_list(request):
                     except Customisation.DoesNotExist:
                         custom_data = None
 
-                # 查询 product 的 asset_code
+                #  search for product's asset_code
                 asset_code = None
                 if item.product:
                     link = (
@@ -170,8 +170,8 @@ def admin_order_list(request):
 @api_view(["POST"])
 def add_order(request):
     """
-    新增订单接口
-    前端传入格式：
+    create order API
+    Request body example:
     {
         user_id: 1,
         total_price: 199.99,
@@ -197,7 +197,7 @@ def add_order(request):
     try:
         data = json.loads(request.body)
 
-        # 验证必要字段
+        # verify required fields
         required_fields = ["user_id", "total_price", "list"]
         for field in required_fields:
             if field not in data:
@@ -211,7 +211,7 @@ def add_order(request):
             )
 
         with transaction.atomic():
-            # ---------- 生成唯一 12 位订单号 ----------
+            # ---------- create unique 12-digit order number ----------
             while True:
                 prefix = timezone.now().strftime("%Y%m%d")  # 例如 20260221
                 suffix = "".join(random.choices(string.digits, k=4))  # 4 位随机数字
@@ -219,7 +219,7 @@ def add_order(request):
                 if not Order.objects.filter(order_number=order_number).exists():
                     break
 
-            # ---------- 创建订单 ----------
+            # ---------- create order ----------
             order = Order.objects.create(
                 user_id=data["user_id"],
                 total_price=data["total_price"],
@@ -229,7 +229,7 @@ def add_order(request):
                 order_number=order_number,
             )
 
-            # ---------- 创建订单项 ----------
+            # ---------- create order items ----------
             order_items = []
             for item_data in data["list"]:
                 if not all(
@@ -292,8 +292,8 @@ def add_order(request):
 @api_view(["GET"])
 def get_user_orders(request, user_id: int):
     """
-    获取指定用户的所有订单及订单项
-    URL 示例: /api/orders/user/1/
+    get user orders API and order details API
+    URL example: /api/orders/user/1/
     """
     try:
         orders = Order.objects.filter(user_id=user_id).order_by("-created_at")
@@ -304,7 +304,7 @@ def get_user_orders(request, user_id: int):
             items_list = []
 
             for item in items_qs:
-                # 查询完整定制数据
+                #  srearch for full customisation data
                 custom_data = None
                 if item.design_id:
                     try:
@@ -319,7 +319,7 @@ def get_user_orders(request, user_id: int):
                     except Customisation.DoesNotExist:
                         custom_data = None
 
-                # 查询 asset_code
+                #  search for asset_code
                 asset_code = None
                 if item.product:
                     link = (
@@ -352,7 +352,7 @@ def get_user_orders(request, user_id: int):
             order_list.append(
                 {
                     "order_id": order.id,
-                    "order_number": order.order_number,  # ✅ 新增订单编号
+                    "order_number": order.order_number,  # ✅ create order number in order model and return it in API
                     "total_price": str(order.total_price),
                     "order_status": order.order_status,
                     "address": order.address,
@@ -370,8 +370,8 @@ def get_user_orders(request, user_id: int):
 @api_view(["POST"])
 def update_order_status(request):
     """
-    更新订单状态接口
-    前端传入:
+    update order status API
+    Request body example:
     {
         "order_id": 1,
         "new_status": "Shipped"
@@ -387,14 +387,14 @@ def update_order_status(request):
                 {"code": 400, "message": "Missing order_id or new_status"}
             )
 
-        # 验证状态值是否有效
+        # verify new_status is valid
         valid_statuses = ["Pending", "Confirmed", "Shipped", "Completed", "Cancelled"]
         if new_status not in valid_statuses:
             return JsonResponse(
                 {"code": 400, "message": f"Invalid status: {new_status}"}
             )
 
-        # 使用事务更新
+        # use transaction to ensure data integrity
         with transaction.atomic():
             try:
                 order = Order.objects.get(id=order_id)
@@ -423,8 +423,8 @@ def update_order_status(request):
 @api_view(["POST"])
 def add_to_cart(request):
     """
-    添加购物车接口
-    前端传入:
+    添加购物车接口 create cart API
+    Request body example:
     {
         "user_id": 1,
         "design_id": 3,
@@ -480,8 +480,8 @@ def add_to_cart(request):
 @api_view(["GET"])
 def get_user_cart(request, user_id: int):
     """
-    获取指定用户的购物车
-    URL 示例: /api/cart/user/1/
+    get user cart API
+    URL example: /api/cart/user/1/
     """
     try:
         cart_items = (
@@ -496,7 +496,7 @@ def get_user_cart(request, user_id: int):
             design = item.design
             product = design.product if hasattr(design, "product") else None
 
-            # 查询 asset_code（和 order 接口一致逻辑）
+            # search for asset_code ,same as previous ones in order items, can consider refactor to a utility function if needed
             asset_code = None
             if product:
                 link = (
@@ -542,8 +542,8 @@ def get_user_cart(request, user_id: int):
 @api_view(["PATCH"])
 def update_cart_quantity(request, cart_item_id: int):
     """
-    修改购物车数量
-    前端传:
+     update cart quantity API
+    Request body example:
     {
         "quantity": 3
     }
@@ -581,7 +581,7 @@ def update_cart_quantity(request, cart_item_id: int):
 @api_view(["DELETE"])
 def batch_delete_cart(request):
     """
-    批量删除购物车项（安全删除 Customisation）
+    batch delete cart items with safe delete for Customisation
     """
     try:
         data = json.loads(request.body)
@@ -594,16 +594,16 @@ def batch_delete_cart(request):
 
             cart_items = Cart.objects.filter(id__in=ids).select_related("design")
 
-            # 先收集需要检查删除的 design
+            # collect design IDs to check if they can be safely deleted after cart items are deleted
             design_to_check = set()
             for item in cart_items:
                 if item.design:
                     design_to_check.add(item.design.id)
 
-            # 删除 Cart
+            # del Cart
             cart_items.delete()
 
-            # 安全删除 design
+            # del design
             for design_id in design_to_check:
                 try:
                     design = Customisation.objects.get(id=design_id)
@@ -623,11 +623,11 @@ def batch_delete_cart(request):
 @api_view(["GET"])
 def monthly_order_count(request):
     """
-    返回当年每个月订单数量统计
+    return monthly order count for current year
     """
     try:
         current_year = now().year
-        # 按月聚合订单数
+        #  by month aggregation of order count
         monthly_counts = (
             Order.objects
             .filter(created_at__year=current_year)
@@ -637,7 +637,7 @@ def monthly_order_count(request):
             .order_by('month')
         )
 
-        # 构造保证12个月都有值的结果
+        #  result with all 12 months having values
         result = {month: 0 for month in range(1, 13)}
         for entry in monthly_counts:
             result[entry['month']] = entry['order_count']

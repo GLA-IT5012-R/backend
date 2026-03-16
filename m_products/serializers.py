@@ -11,7 +11,7 @@ class ProductAssetSerializer(serializers.ModelSerializer):
         ]
 
 class ProductSerializer(serializers.ModelSerializer):
-    # 单品只取第一个 asset 的技术信息
+    # single asset for normal product, multiple assets for bundle
     asset = serializers.SerializerMethodField()
 
     class Meta:
@@ -23,8 +23,8 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def get_asset(self, obj):
-        # 通过 link 表取对应 asset
-        link = obj.asset_links.first()  # 只取第一条
+        # look for linked assets, if it's a bundle, it can have multiple assets, we return the first one for simplicity
+        link = obj.asset_links.first()  # assuming one asset per product for now, can be extended to multiple if needed
         if link and link.asset:
             return ProductAssetSerializer(link.asset).data
         return None

@@ -107,12 +107,12 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 # DATABASE_URL = "postgresql://snowcraft_sql_c5cx_user:jF01Ji56G7FRb9l5tPquZnS9qqiYA71S@dpg-d6s4lp4hg0os73f03gbg-a.oregon-postgres.render.com/snowcraft_sql_c5cx"
 
 if DATABASE_URL:
-    # 如果有 DATABASE_URL（Render 环境），就解析它
+    # if has DATABASE_URL(Render environment), use it to configure database
     DATABASES = {
         "default": dj_database_url.parse(DATABASE_URL)
     }
 else:
-    # 本地开发数据库配置
+    # local development environment
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -126,7 +126,7 @@ else:
 
 
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'       # 你的邮件服务商
+# EMAIL_HOST = 'smtp.gmail.com'       # use Gmail SMTP server
 # EMAIL_PORT = 587
 # EMAIL_USE_TLS = True
 # EMAIL_HOST_USER = 'antares.whx@gmail.com'

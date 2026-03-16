@@ -58,7 +58,7 @@ class CoreFunctionTests(TestCase):
         self.assertEqual(data["product_id"], self.product1.id)
 
     def test_add_order_api(self):
-        """测试 add_order 接口"""
+        """test add_order api"""
         url = reverse('add_order')
         payload = {
             "user_id": self.user.id,
@@ -90,7 +90,7 @@ class CoreFunctionTests(TestCase):
         self.assertEqual(OrderItem.objects.filter(order_id=order_id).count(), 2)
 
     def test_cart_crud(self):
-        """测试购物车增删改"""
+        """test cart CRUD operations"""
         # add_to_cart
         cart_item = Cart.objects.create(
             user_id=self.user.id,
