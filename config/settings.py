@@ -104,7 +104,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # }
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
-# DATABASE_URL = "postgresql://snowcraft_sql_user:d2cBwVQJnbEDemHpd2YA5NJgKVIUpHIL@dpg-d6jut5vkijhs73dece7g-a.oregon-postgres.render.com/snowcraft_sql"
+# DATABASE_URL = "postgresql://snowcraft_sql_c5cx_user:jF01Ji56G7FRb9l5tPquZnS9qqiYA71S@dpg-d6s4lp4hg0os73f03gbg-a.oregon-postgres.render.com/snowcraft_sql_c5cx"
 
 if DATABASE_URL:
     # 如果有 DATABASE_URL（Render 环境），就解析它

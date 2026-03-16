@@ -40,7 +40,7 @@ INSERT INTO public.m_product_asset_links (id, product_id, asset_id, quantity) VA
 (5, 5, 1, 1),
 (6, 6, 2, 1),
 (7, 7, 3, 1),
-(8, 8, 4, 1)
+(8, 8, 4, 1),
 (9, 9, 3, 1),
 (10, 10, 4, 1);
 
