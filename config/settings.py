@@ -103,8 +103,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 #     )
 # }
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-# DATABASE_URL = "postgresql://snowcraft_sql_c5cx_user:jF01Ji56G7FRb9l5tPquZnS9qqiYA71S@dpg-d6s4lp4hg0os73f03gbg-a.oregon-postgres.render.com/snowcraft_sql_c5cx"
+# DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = "postgresql://snowcraft_sql_6c8j_user:h9QTcbkEZg18ECtOttJEaBoUHQGqULQP@dpg-d6siu6ma2pns7387uh2g-a.oregon-postgres.render.com/snowcraft_sql_6c8j"
 
 if DATABASE_URL:
     # if has DATABASE_URL(Render environment), use it to configure database
