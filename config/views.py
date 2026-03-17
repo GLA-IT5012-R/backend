@@ -52,7 +52,7 @@ def home(request):
                 <div class="admin-info">
                     🎉 Congratulations on checking this page!<br>
                     The admin account and password are:<br>
-                    <code>admin@example.com</code> / <code>password123</code><br>
+                    <code>admin</code> / <code>django2026</code><br>
                     Visit the <a href="https://snowcraft-dtc.vercel.app/adminlogin" target="_blank">Admin Dashboard</a>
                 </div>
             </div>
